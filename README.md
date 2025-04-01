@@ -1,159 +1,67 @@
 # ProjektDarwinPO
 
-Projekt z Programowania Obiektowego
+Symulacja ewolucyjnego świata zwierząt w środowisku stepów i dżungli. Projekt realizowany w ramach przedmiotu Programowanie Obiektowe.
 
-Autorzy:
-Piotr Świerzy
-Szymon Tworek
+## 👥 Autorzy
 
-# Treść projektu
+- [Piotr Świerzy](https://github.com/pswierzy)
+- [Szymon Tworek](https://github.com/szTworek)
 
-Stwórzmy grę! Nie będzie to jednak gra, w którą my gramy. Zamiast tego będzie to świat, który ewoluuje na naszych oczach! Stworzymy środowisko stepów i dżungli ze zwierzakami, które biegają, buszują w zaroślach, jedzą i rozmnażają się. A po kilku milionach lat zobaczymy, że wyewoluowały w różne gatunki!
+## 📌 O czym jest projekt?
 
-Świat naszej gry jest dość prosty. Składa się ze zwykłej, prostokątnej połaci podzielonej na kwadratowe pola. Większość świata pokrywają stepy, na których rośnie niewiele roślin stanowiących pożywienie zwierzaków. Niektóre rejeony porasta jednak dżungla, gdzie rośliny rosną dużo szybciej. Rośliny będą wyrastały w losowych miejscach, ale ich koncentracja będzie większa w dżungli niż na stepie.
+Projekt DarwinPO to interaktywna symulacja, w której obserwujemy ewolucję zwierząt na dynamicznie zmieniającej się mapie. Zwierzęta (roślinożercy) poruszają się, jedzą rośliny, tracą energię i rozmnażają się, a ich zachowanie determinowane jest przez geny. Główne cechy symulacji:
 
-Nasze zwierzęta, które są roślinożercami, będą przemierzały ten świat w poszukiwaniu pożywienia. Każdy zwierzak ma określoną energię, która zmniejsza się co dnia. Znalezienie i zjedzenie rośliny zwiększa poziom energii o pewną wartość.
+- **Świat podzielony na stepy i dżungle** z różnym tempem wzrostu roślin.
+- **Geny sterujące ruchem** – każdy zwierzak ma unikalny genom decydujący o kierunku przemieszczania.
+- **Rozmnażanie z mutacjami** – potomkowie dziedziczą geny rodziców z losowymi zmianami.
+- **Konfigurowalne parametry** – rozmiar mapy, liczba zwierząt, energia, mutacje itd.
+- **Warianty realizowane w projekcie**:
+  - _Mapa: Kula ziemska_ (zapętlone krawędzie boczne, bieguny nieprzekraczalne).
+  - _Wzrost roślin: Życiodajne truchła_ (rośliny preferują pola wokół martwych zwierząt).
+  - _Mutacje: Pełna losowość_.
+  - _Zachowanie zwierząt: Nieco szaleństwa_ (80% szans na kolejny gen, 20% na losowy skok).
 
-## Anatomia zwierzaka
+## 🛠️ Główne funkcje
 
-Musimy śledzić kilka cech każdego zwierzaka. Po pierwsze, zarówno w przypadku rośliny jak i tych, którzy je zjadają, musimy znać koordynaty `x` i `y`. Wskazują nam one, gdzie dany zwierzak lub roślina jest na mapie.
+- **Interfejs graficzny (JavaFX)**:
+  - Animacja mapy z wizualizacją zwierząt (kierunek, energia) i roślin.
+  - Możliwość uruchomienia wielu symulacji jednocześnie w osobnych oknach.
+  - Kontrola czasu symulacji (pauza/wznowienie).
+- **Konfiguracja symulacji**:
+  - Wybór gotowych presetów lub tworzenie własnych.
+  - Zapisywanie i wczytywanie konfiguracji.
+- **Statystyki w czasie rzeczywistym**:
+  - Liczba zwierząt, roślin, wolnych pól.
+  - Średnia energia, długość życia, liczba dzieci.
+  - Najpopularniejsze genotypy.
+- **Śledzenie wybranych zwierząt**:
+  - Pokaz genomu, aktywnego genu, energii, liczby potomków itd.
+- **Eksport danych**:
+  - Zapis statystyk do pliku CSV.
+- **Wyróżnianie elementów**:
+  - Pola preferowane przez rośliny.
+  - Zwierzęta z dominującymi genotypami.
 
-Musimy także wiedzieć, ile energii ma dany zwierzak. To darwinowska gra o przetrwanie, więc jeśli zwierzak nie zdoła zdobyć odpowiedniej ilości pożywienia, będzie głodować i zdechnie... Energia mówi nam o tym, ile dni funkcjonowania zostało jeszcze danemu zwierzakowi. Musi ono koniecznie znaleźć więcej jedzenia, zanim jej zapas się wyczerpie.
+## 📦 Wymagania techniczne
 
-Musimy również pamiętać, w którą stronę zwierzak jest zwrócony. Jest to ważne, ponieważ każdego dnia będzie ono poruszać się na mapie w tym właśnie kierunku. Istnieje osiem różnych możliwych pozycji i tyle samo możliwych obrotów. Obrót `0` oznacza, że zwierzak nie zmienia swojej orientacji, obrót `1` oznacza, że zwierzak obraca się o 45°, `2`, o 90°, itd. Przykładowo: jeśli zwierzak był skierowany na północ i obrót wynosi `1`, to zwierzak skierowany jest teraz na północny wschód.
+- Java 17 lub nowsza.
+- JavaFX.
+- Gradle (do budowania projektu).
 
-Na koniec musimy także przechowywać geny zwierzaka. Każdy zwierzak ma N genów, z których każdy jest jedną liczbą z zakresu od `0` do `7`. Geny te opisują (w bardzo uproszczony sposób) schemat zachowania danej istoty. Egzystencja naszych zwierzaków ma cykliczną naturę. Każdy z nich przechowuje informację o tym, z którego fragmentu swojego genomu będzie korzystał najbliższego dnia. Podczas każdego ruchu zwierzak zmienia najpierw swoje ustawienie, obracając się zgodnie z aktualnie aktywnym genem, a potem porusza się o jedno pole w wyznaczonym kierunku. Następnie gen ulega dezaktywacji, a aktywuje się gen na prawo od niego (będzie sterował zwierzakiem kolejnego dnia). Gdy geny skończą się, to aktywacja wraca na początek ich listy. Przykładowo - genom:
-`0 0 7 0 4`
-oznacza, że żyjątko będzie kolejno: szło przed siebie, szło przed siebie, szło nieco w lewo, szło przed siebie, zawracało, szło przed siebie, ... - itd.
+## 🚀 Uruchamianie projektu
 
-## Konsumpcja i rozmnażanie
+1. Sklonuj repozytorium:
+   ```bash
+   git clone https://github.com/pswierzy/ProjektDarwinPO
+   ```
+2. Wejdź do katalogu projektu:
+   ```bash
+   cd ProjektDarwinPO/Projekt
+   ```
+3. Zbuduj i uruchom za pomocą Gradle:
 
-Jedzenie jest prostym procesem. Zakładamy, że zwierzak zjada roślinę, gdy stanie na jej polu, a jego energia wzrasta wtedy o z góry zdefiniowaną wartość.
+   ```bash
+   ./gradlew run
+   ```
 
-Rozmnażanie jest zwykle najciekawszą częścią każdej symulacji ze zwierzakami. Zdrowe młode może mieć tylko zdrowa para rodziców, dlatego nasze zwierzaki będą się rozmnażać tylko jeśli mają odpowiednią ilość energii. Przy reprodukcji rodzice tracą na rzecz młodego pewną część swojej energii - ta energia będzie rónocześnie stanowić startową energię ich potomka.
-
-Urodzone zwierzę otrzymuje genotyp będący krzyżówką genotypów rodziców. Udział genów jest proporcjonalny do energii rodziców i wyznacza miejsce podziału genotypu. Przykładowo, jeśli jeden rodzic ma 50, a drugi 150 punktów energii, to dziecko otrzyma 25% genów pierwszego oraz 75% genów drugiego rodzica. Udział ten określa miejsce przecięcia genotypu, przyjmując, że geny są uporządkowane. W pierwszym kroku losowana jest strona genotypu, z której zostanie wzięta część osobnika silniejszego, np. _prawa_. W tym przypadku dziecko otrzymałoby odcinek obejmujący 25% _lewych_ genów pierwszego rodzica oraz 75% _prawych_ genów drugiego rodzica. Jeśli jednak wylosowana byłaby strona _lewa_, to dziecko otrzymałoby 75% _lewych_ genów silniejszego osobnika oraz 25% _prawych_ genów. Na koniec mają zaś miejsce mutacje: losowa liczba (wybranych również losowo) genów potomka zmienia swoje wartości na zupełnie nowe.
-
-## Symulacja
-
-Symulacja każdego dnia składa się z poniższej sekwencji kroków:
-
-1. Usunięcie martwych zwierzaków z mapy.
-2. Skręt i przemieszczenie każdego zwierzaka.
-3. Konsumpcja roślin, na których pola weszły zwierzaki.
-4. Rozmnażanie się najedzonych zwierzaków znajdujących się na tym samym polu.
-5. Wzrastanie nowych roślin na wybranych polach mapy.
-
-Daną symulację opisuje szereg parametrów:
-
-- wysokość i szerokość mapy,
-- wariant mapy (wyjaśnione w sekcji poniżej),
-- startowa liczba roślin,
-- energia zapewniana przez zjedzenie jednej rośliny,
-- liczba roślin wyrastająca każdego dnia,
-- wariant wzrostu roślin (wyjaśnione w sekcji poniżej),
-- startowa liczba zwierzaków,
-- startowa energia zwierzaków,
-- energia konieczna, by uznać zwierzaka za najedzonego (i gotowego do rozmnażania),
-- energia rodziców zużywana by stworzyć potomka,
-- minimalna i maksymalna liczba mutacji u potomków (może być równa `0`),
-- wariant mutacji (wyjaśnione w sekcji poniżej),
-- długość genomu zwierzaków,
-- wariant zachowania zwierzaków (wyjaśnione w sekcji poniżej).
-
-## Warianty konfiguracji
-
-Pewne aspekty symulacji są konfigurowalne i mogą silnie zmieniać jej przebieg. Część to zwykłe parametry liczbowe (np. początkowe rozmiary populacji). Część z nich jednak dość znacząco modyfikuje jej zasady. Dotyczy to w szczególności: działania mapy, działania wzrostu roślin, działania mutacji, zachowania zwierzaków. Każdy zespół realizujący projekt **powinien zrealizować wszystkie aspekty z sekcji poniżej oznaczone jako obowiązkowe, a także dodatkowo 2 warianty przydzielone na pierwszych zajęciach przez prowadzącego**. Jeden z dodatkowych wariantów będzie dotyczyć mapy (jej kształtu lub roślinności), a drugi zwierzaków (ich zachowania lub mutacji przy rozmnażaniu).
-Wylosowaliśmy E3, czyli życiodajne truchła i nieco szaleństwa.
-
-### Mapa i roślinność
-
-W przypadku mapy kluczowe jest to, jak obsługujemy jej krawędzie. Zrealizujemy następujące warianty:
-
-- **kula ziemska** - lewa i prawa krawędź mapy zapętlają się (jeżeli zwierzak wyjdzie za lewą krawędź, to pojawi się po prawej stronie - a jeżeli za prawą, to po lewej); górna i dolna krawędź mapy to bieguny - nie można tam wejść (jeżeli zwierzak próbuje wyjść poza te krawędzie mapy, to pozostaje na polu na którym był, a jego kierunek zmienia się na odwrotny);
-
-W przypadku wzrostu roślin pewne pola są silnie preferowane, zgodnie z zasadą Pareto. Istnieje 80% szansy, że nowa roślina wyrośnie na preferowanym polu, a tylko 20% szans, że wyrośnie na polu drugiej kategorii. Preferowanych jest około 20% wszystkich miejsc na mapie, 80% miejsc jest uznawane za nieatrakcyjne. Implementujemy następujące warianty:
-
-- **zalesione równiki** - preferowany przez rośliny jest poziomy pas pól w centralnej części mapy (udający równik i okolice);
-- **życiodajne truchła** - rośliny preferują rosnąć na tych polach, w których sąsiedztwie niedawno zdechł zwierzak;
-
-### Zwierzaki
-
-W przypadku mutacji mamy do czynienia z dwoma prostymi opcjami:
-
-- **pełna losowość** - mutacja zmienia gen na dowolny inny gen;
-
-Podobnie proste są warianty zachowania:
-
-- **pełna predestynacja** - zwierzak zawsze wykonuje kolejno geny, jeden po drugim;
-- **nieco szaleństwa** - w 80% przypadków zwierzak po wykonaniu genu aktywuje gen następujący zaraz po nim, w 20% przypadków przeskakuje jednak do innego, losowego genu;
-
-## Wymagania dla aplikacji
-
-1. Aplikacja ma być realizowana z użyciem graficznego interfejsu użytkownika z wykorzystaniem biblioteki JavaFX.
-2. Jej głównym zadaniem jest umożliwienie uruchamiania symulacji o wybranych konfiguracjach.
-   1. Powinna umożliwić wybranie jednej z uprzednio przygotowanych gotowych konfiguracji,
-   1. "wyklikanie" nowej konfiguracji,
-   1. oraz zapisanie jej do ponownego użytku w przyszłości.
-3. Uruchomienie symulacji powinno skutkować pojawieniem się nowego okna obsługującego daną symulację.
-   1. Jednocześnie uruchomionych może być wiele symulacji, każda w swoim oknie, każda na osobnej mapie.
-4. Sekcja symulacji ma wyświetlać animację pokazującą pozycje zwierzaków, ich energię w dowolnej formie (np. koloru lub paska zdrowia) oraz pozycje roślin - i ich zmiany.
-5. Program musi umożliwiać zatrzymywanie oraz wznawianie animacji w dowolnym momencie (niezależnie dla każdej mapy - patrz niżej).
-6. Program ma pozwalać na śledzenie następujących statystyk dla aktualnej sytuacji w symulacji:
-   - liczby wszystkich zwierzaków,
-   - liczby wszystkich roślin,
-   - liczby wolnych pól,
-   - najpopularniejszych genotypów,
-   - średniego poziomu energii dla żyjących zwierzaków,
-   - średniej długości życia zwierzaków dla martwych zwierzaków (wartość uwzględnia wszystkie nieżyjące zwierzaki - od początku symulacji),
-   - średniej liczby dzieci dla żyjących zwierzaków (wartość uwzględnia wszystkie powstałe zwierzaki, a nie tylko zwierzaki powstałe w danej epoce).
-7. Po zatrzymaniu programu można oznaczyć jednego zwierzaka jako wybranego do śledzenia. Od tego momentu (do zatrzymania śledzenia) UI powinien przekazywać nam informacje o jego statusie i historii:
-   - jaki ma genom,
-   - która jego część jest aktywowana,
-   - ile ma energii,
-   - ile zjadł roślin,
-   - ile posiada dzieci,
-   - ile posiada potomków (niekoniecznie będących bezpośrednio dziećmi),
-   - ile dni już żyje (jeżeli żyje),
-   - którego dnia zmarło (jeżeli żywot już skończyło).
-8. Po zatrzymaniu programu powinno być też możliwe:
-   - pokazanie, które ze zwierząt mają dominujący (najpopularniejszy) genotyp (np. poprzez wyróżnienie ich wizualnie),
-   - pokazanie, które z pól są preferowane przez rośliny (np. poprzez wyróżnienie ich wizualnie).
-9. Jeżeli zdecydowano się na to w momencie uruchamiania symulacji, to jej statystyki powinny być zapisywane (każdego dnia) do pliku CSV. Plik ten powinnien być "otwieralny" przez dowolny rozujmiejący ten format program (np. MS Excel).
-10. Aplikacja powinna być możliwa do zbudowania i uruchomienia z wykorzystaniem Gradle'a.
-
-## Ocenianie
-
-Za projekt można zdobyć łącznie **32xp** (powiększone o ewentualne bonusy wynikające z marchewek projektowych). Podczas oceniania uwzględniane będą następujące czynniki:
-
-1. Funkcjonalność (16xp) - kompletność programu i pokrycie wszystkich wymagań, a także (przynajmniej minimalnie przyzwoita) ergonomia interfejsu użytkownika.
-2. Kod programu (16xp)
-   - Architektura - dekompozycja problemu, projekt modelu aplikacji, zastosowawnie wzorców projektowych;
-   - Clean code - estetyka kodu, czytelność, stosowanie zasad SOLID, poprawne nazewnictwo itp;
-   - Wydajność i techniczna realizacja - dobieranie odpowiednich narzędzi i algorytmów do problemów, prawidłowa obsługa wątków itp.
-   - Obsługa błędów i zasobów zewnętrznych
-   - Testy - powinny weryfikować przynajmniej kluczowe fragmenty logiki aplikacji
-
-## FAQ
-
-(A właściwie odpowiedzi na nie)
-
-- Nowo narodzony (lub wygenerowany) zwierzak jest ustawiony w losowym kierunku. Ma też aktywowany losowy gen (niekoniecznie pierwszy).
-- Narodzone dziecko pojawia się na tym samym polu co jego rodzice.
-- UI nie musi pozwalać na wprowadzanie dowolnych wartości parametrów. Lepiej ograniczyć dopuszczalne zakresy (w szczególności do takich, które nie spowodują natychmiastowego zawieszenia aplikacji).
-- Energię traktujemy całkowitoliczbowo. Pilnujemy jednak, by jej jedynym źródłem były rośliny (po rozmnażaniu się suma energii organizmów na danym polu powinna być taka sama jak przed rozmnażaniem).
-- Jeżeli na jednym polu kilka zwierzaków rywalizuje o roślinę (albo o możliwość rozmnażania), to konflikt ten jest rozwiązywany w następujący sposób:
-  - pierwszeństwo mają organizmy o największej energii,
-  - jeżeli to nie pozwala rozstrzygnąć, to pierwszeństwo mają organizmy najstarsze,
-  - jeżeli to nie pozwala rozstrzygnąć, to pierwszeństwo mają organizmy o największej liczbie dzieci,
-  - jeżeli to nie pozwala rozstrzygnąć, to wśród remisujących organizmów wybieramy losowo.
-- Rośliny mogą rosnąć tam, gdzie stoją zwierzaki. Zjadanie ma miejsce w momencie wchodzenia na pole. Potem zwierzak nie przeszkadza już w istnieniu rośliny.
-- Nowe rośliny nie pojawiają się, jeżeli nie ma już dla nich miejsca na mapie.
-- Statystyki nie muszą być prezentowane w formie wykresu (choć na pewno byłoby to ciekawe usprawnienie).
-- Powyższa specyfikacja może różnić się trochę (lub bardzo) od analogicznych dokumentów znanych ubiegłym rocznikom. Zaleca się czujność i unikanie dróg na skróty. :)
-
-# Przykładowe implementacje
-
-Uwaga: przedstawione implementacje niekoniecznie spełniają tegoroczne wymagania.
-
-- https://www.youtube.com/watch?v=4FangGEpwe4
+   (na Windowsie użyj `gradlew.bat`).
